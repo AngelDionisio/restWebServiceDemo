@@ -23,7 +23,15 @@ var bookRouter = express.Router();
 
 bookRouter.route('/Books')
 	.get(function (req, res) {
-		Book.find(function (err, books) {
+
+		var query = {};
+
+		// sanatize user input, if the query is a valid query [by genre in this ex], then set the query to that
+		if(req.query.genre) {
+			query.genre = req.query.genre;
+		}
+
+		Book.find(query, function (err, books) {
 			if(err)
 				res.status(500).send(err);
 			else
