@@ -1,5 +1,6 @@
 var express = require('express'),
-	mongoose = require('mongoose');
+	mongoose = require('mongoose'),
+	bodyParser = require('body-Parser');
 
 mongoose.connect('mongodb://localhost/bookAPI');
 
@@ -18,10 +19,21 @@ var app = express();
 // Look for the enviroment port variable, if it is not found, set the port to 3000
 var port = process.env.PORT || 3000;
 
+// Loading the body parser into app
+// This looks into the response's body and see if there is any json, if there is, it adds it to the req.body
+app.use(bodyParser.urlencoded({extended:true}));
+app.use(bodyParser.json());
 
 var bookRouter = express.Router();
 
 bookRouter.route('/Books')
+	.post(function (req, res) {
+		var book = new Book(req.body);
+
+		console.log(book);
+		res.send(book);
+
+	})
 	.get(function (req, res) {
 
 		var query = {};
@@ -36,7 +48,20 @@ bookRouter.route('/Books')
 				res.status(500).send(err);
 			else
 				res.json(books);
-		})
+		});
+		// var responseJson = {hello: 'This is my API'};
+		// res.json(responseJson);
+	});
+
+bookRouter.route('/Books/:bookId')
+	.get(function (req, res) {
+
+		Book.findById(req.params.bookId, function (err, book) {
+			if(err)
+				res.status(500).send(err);
+			else
+				res.json(book);
+		});
 		// var responseJson = {hello: 'This is my API'};
 		// res.json(responseJson);
 	});
